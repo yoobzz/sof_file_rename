@@ -1,18 +1,9 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "app.py",
+      "src": "**/*",
       "use": "@vercel/python"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "app.py"
-    }
-  ],
-  "env": {
-    "FLASK_ENV": "production"
-  }
+  "installCommand": "pip install --upgrade pip setuptools wheel && pip install -r requirements.txt"
 }
