@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zmiana Nazw Plików - Student</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="text"]:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 20px;
+            border: 2px dashed #4facfe;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+            color: #4facfe;
+            font-weight: 600;
+        }
+
+        .file-input-label:hover {
+            background: #4facfe;
+            color: white;
+        }
+
+        .file-input-label.has-file {
+            background: #e8f5e8;
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .upload-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .upload-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e1e5e9;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .result-container {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+        }
+
+        .result-container.error {
+            background: #fff5f5;
+            border-left-color: #dc3545;
+        }
+
+        .result-container h3 {
+            margin-bottom: 15px;
+            color: #28a745;
+        }
+
+        .result-container.error h3 {
+            color: #dc3545;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 12px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: #28a745;
+            color: white;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .user-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #1976d2;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Zmiana Nazw Plików</h1>
+            <p>Dla Studentów - Automatyczne formatowanie nazw</p>
+        </div>
+
+        <div class="form-container">
+            <div id="userInfo" class="user-info" style="display: none;">
+                <strong>👤 Witaj ponownie!</strong>
+                <span id="welcomeText"></span>
+                <button onclick="clearUserData()" style="float: right; background: none; border: none; color: #666; cursor: pointer; font-size: 0.8em;" title="Wyczyść zapisane dane">✕</button>
+            </div>
+
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="firstName">Imię *</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                    <small style="color: #666; font-size: 0.8em;">💾 Zostanie zapamiętane w przeglądarce</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName">Nazwisko *</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                    <small style="color: #666; font-size: 0.8em;">💾 Zostanie zapamiętane w przeglądarce</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="exerciseName">Nazwa ćwiczenia (opcjonalne)</label>
+                    <input type="text" id="exerciseName" name="exerciseName" placeholder="np. Zadanie 1, Test końcowy">
+                    <small style="color: #666; font-size: 0.8em;">💾 Zostanie zapamiętane jako domyślna nazwa</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="file">Wybierz plik *</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="file" name="file" accept=".png,.jpg,.jpeg,.gif,.pdf,.doc,.docx" required>
+                        <label for="file" class="file-input-label" id="fileLabel">
+                            📎 Kliknij aby wybrać plik lub przeciągnij tutaj
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="upload-btn" id="uploadBtn">
+                    🚀 Prześlij i Zmień Nazwę
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Przesyłanie pliku...</p>
+            </div>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <div class="result-container" id="resultContainer">
+                <h3 id="resultTitle">✅ Sukces!</h3>
+                <p id="resultMessage"></p>
+                <div id="actionButtons"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sprawdź czy użytkownik ma zapisane dane (localStorage + server)
+        window.addEventListener('load', function() {
+            // Najpierw sprawdź localStorage
+            const savedFirstName = localStorage.getItem('userFirstName');
+            const savedLastName = localStorage.getItem('userLastName');
+            const savedExercise = localStorage.getItem('userDefaultExercise');
+            
+            if (savedFirstName && savedLastName) {
+                document.getElementById('firstName').value = savedFirstName;
+                document.getElementById('lastName').value = savedLastName;
+                if (savedExercise) {
+                    document.getElementById('exerciseName').value = savedExercise;
+                }
+                
+                document.getElementById('welcomeText').textContent = 
+                    `${savedFirstName} ${savedLastName}`;
+                document.getElementById('userInfo').style.display = 'block';
+            }
+            
+            // Sprawdź też dane z serwera
+            fetch('/get_user_data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.firstName && data.lastName) {
+                        // Jeśli serwer ma nowsze dane, użyj ich
+                        if (!savedFirstName || !savedLastName) {
+                            document.getElementById('firstName').value = data.firstName;
+                            document.getElementById('lastName').value = data.lastName;
+                            if (data.lastExercise) {
+                                document.getElementById('exerciseName').value = data.lastExercise;
+                            }
+                            
+                            // Zapisz w localStorage
+                            localStorage.setItem('userFirstName', data.firstName);
+                            localStorage.setItem('userLastName', data.lastName);
+                            if (data.lastExercise) {
+                                localStorage.setItem('userDefaultExercise', data.lastExercise);
+                            }
+                            
+                            document.getElementById('welcomeText').textContent = 
+                                `${data.firstName} ${data.lastName}`;
+                            document.getElementById('userInfo').style.display = 'block';
+                        }
+                    }
+                });
+        });
+
+        // Obsługa drag & drop
+        const fileInput = document.getElementById('file');
+        const fileLabel = document.getElementById('fileLabel');
+
+        fileLabel.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            fileLabel.style.background = '#4facfe';
+            fileLabel.style.color = 'white';
+        });
+
+        fileLabel.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            fileLabel.style.background = '#f8f9ff';
+            fileLabel.style.color = '#4facfe';
+        });
+
+        fileLabel.addEventListener('drop', function(e) {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFileLabel(files[0].name);
+            }
+            fileLabel.style.background = '#f8f9ff';
+            fileLabel.style.color = '#4facfe';
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                updateFileLabel(e.target.files[0].name);
+            }
+        });
+
+        function updateFileLabel(filename) {
+            fileLabel.textContent = `📎 ${filename}`;
+            fileLabel.classList.add('has-file');
+        }
+
+        // Automatyczne zapisywanie danych użytkownika
+        document.getElementById('firstName').addEventListener('input', function() {
+            if (this.value.trim()) {
+                localStorage.setItem('userFirstName', this.value.trim());
+                updateWelcomeMessage();
+            }
+        });
+
+        document.getElementById('lastName').addEventListener('input', function() {
+            if (this.value.trim()) {
+                localStorage.setItem('userLastName', this.value.trim());
+                updateWelcomeMessage();
+            }
+        });
+
+        document.getElementById('exerciseName').addEventListener('input', function() {
+            if (this.value.trim()) {
+                localStorage.setItem('userDefaultExercise', this.value.trim());
+            }
+        });
+
+        function updateWelcomeMessage() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            
+            if (firstName && lastName) {
+                document.getElementById('welcomeText').textContent = `${firstName} ${lastName}`;
+                document.getElementById('userInfo').style.display = 'block';
+            } else {
+                document.getElementById('userInfo').style.display = 'none';
+            }
+        }
+
+        // Obsługa formularza
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const uploadBtn = document.getElementById('uploadBtn');
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            
+            // Ukryj poprzednie wyniki
+            resultContainer.style.display = 'none';
+            
+            // Pokaż loading
+            uploadBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            // Symulacja progress bara
+            const progressFill = document.getElementById('progressFill');
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                progressFill.style.width = progress + '%';
+            }, 100);
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    uploadBtn.disabled = false;
+                    
+                    if (data.success) {
+                        showSuccess(data);
+                    } else {
+                        showError(data.error);
+                    }
+                }, 500);
+            })
+            .catch(error => {
+                clearInterval(progressInterval);
+                loading.style.display = 'none';
+                uploadBtn.disabled = false;
+                showError('Wystąpił błąd podczas przesyłania pliku');
+            });
+        });
+
+        function showSuccess(data) {
+            const resultContainer = document.getElementById('resultContainer');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const actionButtons = document.getElementById('actionButtons');
+            
+            resultContainer.classList.remove('error');
+            resultTitle.textContent = '✅ Sukces!';
+            resultMessage.textContent = data.message;
+            
+            actionButtons.innerHTML = `
+                <a href="/download/${data.filePath}" class="download-btn" download>
+                     Pobierz plik
+                </a>
+            `;
+            
+            resultContainer.style.display = 'block';
+        }
+
+        function showError(message) {
+            const resultContainer = document.getElementById('resultContainer');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const actionButtons = document.getElementById('actionButtons');
+            
+            resultContainer.classList.add('error');
+            resultTitle.textContent = '❌ Błąd!';
+            resultMessage.textContent = message;
+            actionButtons.innerHTML = '';
+            
+            resultContainer.style.display = 'block';
+        }
+
+
+        function clearUserData() {
+            if (confirm('Czy na pewno chcesz wyczyścić zapisane dane?')) {
+                // Wyczyść localStorage
+                localStorage.removeItem('userFirstName');
+                localStorage.removeItem('userLastName');
+                localStorage.removeItem('userDefaultExercise');
+                
+                // Wyczyść pola formularza
+                document.getElementById('firstName').value = '';
+                document.getElementById('lastName').value = '';
+                document.getElementById('exerciseName').value = '';
+                
+                // Ukryj powitanie
+                document.getElementById('userInfo').style.display = 'none';
+                
+                alert('✅ Zapisane dane zostały wyczyszczone');
+            }
+        }
+    </script>
+</body>
+</html

@@ -1,0 +1,17 @@
+# Konfiguracja aplikacji
+SECRET_KEY=your-secret-key-here
+FLASK_ENV=development
+
+# Google Drive API
+GOOGLE_DRIVE_CREDENTIALS_FILE=credentials.json
+GOOGLE_DRIVE_TOKEN_FILE=token.pickle
+
+# Email configuration (SendGrid)
+SENDGRID_API_KEY=your-sendgrid-api-key-here
+FROM_EMAIL=noreply@studentfiles.com
+
+# Opcjonalne: SMTP configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
