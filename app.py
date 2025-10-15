@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 import re
 from pathlib import Path
+import io
 
 app = Flask(__name__)
 
@@ -54,94 +55,110 @@ def generate_filename(original_name, first_name, last_name, exercise_name=None):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'Brak pliku'}), 400
-    
-    file = request.files['file']
-    
-    # Pobierz dane z formularza lub z sesji
-    user_id = session.get('user_id')
-    users_data = load_users()
-    user_data = users_data.get(user_id, {}) if user_id else {}
-    
-    first_name = request.form.get('firstName', '').strip() or user_data.get('firstName', '')
-    last_name = request.form.get('lastName', '').strip() or user_data.get('lastName', '')
-    
-    # Pobierz przedmiot i projekt
-    subject = request.form.get('subjectSelect', '').strip()
-    custom_subject = request.form.get('customSubject', '').strip()
-    project_name = request.form.get('projectName', '').strip()
-    
-    # Stwórz pełną nazwę ćwiczenia
-    exercise_name = ''
-    if subject and subject != 'custom':
-        exercise_name = subject
-    elif custom_subject:
-        exercise_name = custom_subject
-    
-    if project_name:
-        exercise_name += f'_{project_name}' if exercise_name else project_name
-    
-    if file.filename == '':
-        return jsonify({'error': 'Nie wybrano pliku'}), 400
-    
-    if not first_name or not last_name:
-        return jsonify({'error': 'Imię i nazwisko są wymagane. Skonfiguruj je w ustawieniach.'}), 400
-    
-    if not allowed_file(file.filename):
-        return jsonify({'error': 'Nieprawidłowy typ pliku'}), 400
-    
-    # Zapisz dane użytkownika w sesji
-    session['firstName'] = first_name
-    session['lastName'] = last_name
-    session['exerciseName'] = exercise_name
-    
-    # Zapisz dane użytkownika w pliku
-    users_data = load_users()
-    user_id = session.get('user_id', str(uuid.uuid4()))
-    session['user_id'] = user_id
-    
-    users_data[user_id] = {
-        'firstName': first_name,
-        'lastName': last_name,
-        'lastExercise': exercise_name,
-        'lastLogin': datetime.now().isoformat()
-    }
-    save_users(users_data)
-    
-    # Wygeneruj nową nazwę pliku
-    new_filename = generate_filename(file.filename, first_name, last_name, exercise_name)
-    
-    # Zapisz plik
-    filename = secure_filename(new_filename)
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(file_path)
-    
-    return jsonify({
-        'success': True,
-        'newFilename': new_filename,
-        'filePath': filename,
-        'message': 'Plik został przesłany pomyślnie!'
-    })
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'Brak pliku'}), 400
+
+        file = request.files['file']
+
+        # Pobierz dane z formularza lub z sesji
+        user_id = session.get('user_id')
+        users_data = load_users()
+        user_data = users_data.get(user_id, {}) if user_id else {}
+
+        first_name = request.form.get('firstName', '').strip() or user_data.get('firstName', '')
+        last_name = request.form.get('lastName', '').strip() or user_data.get('lastName', '')
+
+        # Pobierz przedmiot i projekt
+        subject = request.form.get('subjectSelect', '').strip()
+        custom_subject = request.form.get('customSubject', '').strip()
+        project_name = request.form.get('projectName', '').strip()
+
+        # Stwórz pełną nazwę ćwiczenia
+        exercise_name = ''
+        if subject and subject != 'custom':
+            exercise_name = subject
+        elif custom_subject:
+            exercise_name = custom_subject
+
+        if project_name:
+            exercise_name += f'_{project_name}' if exercise_name else project_name
+
+        if file.filename == '':
+            return jsonify({'error': 'Nie wybrano pliku'}), 400
+
+        if not first_name or not last_name:
+            return jsonify({'error': 'Imię i nazwisko są wymagane. Skonfiguruj je w ustawieniach.'}), 400
+
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'Nieprawidłowy typ pliku'}), 400
+
+        # Zapisz dane użytkownika w sesji
+        session['firstName'] = first_name
+        session['lastName'] = last_name
+        session['exerciseName'] = exercise_name
+
+        # Zapisz dane użytkownika w pliku
+        users_data = load_users()
+        user_id = session.get('user_id', str(uuid.uuid4()))
+        session['user_id'] = user_id
+
+        users_data[user_id] = {
+            'firstName': first_name,
+            'lastName': last_name,
+            'lastExercise': exercise_name,
+            'lastLogin': datetime.now().isoformat()
+        }
+        save_users(users_data)
+
+        # Wygeneruj nową nazwę pliku
+        new_filename = generate_filename(file.filename, first_name, last_name, exercise_name)
+
+        # Zapisz plik
+        filename = secure_filename(new_filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        return jsonify({
+            'success': True,
+            'newFilename': new_filename,
+            'filePath': filename,
+            'message': 'Plik został przesłany pomyślnie!'
+        })
+    except Exception as e:
+        return jsonify({'error': f'Wystąpił błąd: {str(e)}'}), 500
 
 @app.route('/download/<filename>')
 def download_file(filename):
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    if os.path.exists(file_path):
-        return send_file(file_path, as_attachment=True)
-    return jsonify({'error': 'Plik nie został znaleziony'}), 404
+    try:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if os.path.exists(file_path):
+            return send_file(file_path, as_attachment=True)
+        return jsonify({'error': 'Plik nie został znaleziony'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Wystąpił błąd: {str(e)}'}), 500
+
+@app.route('/health')
+def health():
+    return jsonify({'status': 'ok'})
 
 @app.route('/get_user_data')
 def get_user_data():
-    user_id = session.get('user_id')
-    if user_id:
-        users_data = load_users()
-        return jsonify(users_data.get(user_id, {}))
-    return jsonify({})
+    try:
+        user_id = session.get('user_id')
+        if user_id:
+            users_data = load_users()
+            return jsonify(users_data.get(user_id, {}))
+        return jsonify({})
+    except Exception as e:
+        return jsonify({'error': f'Wystąpił błąd: {str(e)}'}), 500
 
 
 
