@@ -144,13 +144,6 @@ def get_user_data():
     return jsonify({})
 
 
-@app.route('/upload_to_drive', methods=['POST'])
-def upload_to_drive():
-    return jsonify({'error': 'Funkcja Google Drive będzie dostępna wkrótce!'}), 501
-
-@app.route('/send_email', methods=['POST'])
-def send_email():
-    return jsonify({'error': 'Funkcja email będzie dostępna wkrótce!'}), 501
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

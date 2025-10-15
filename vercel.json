@@ -1,9 +1,19 @@
 {
+  "version": 2,
   "builds": [
     {
-      "src": "**/*",
-      "use": "@vercel/python"
+      "src": "app.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "includeFiles": "templates/**,static/**"
+      }
     }
   ],
-  "installCommand": "pip install --upgrade pip setuptools wheel && pip install -r requirements.txt"
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ]
 }
