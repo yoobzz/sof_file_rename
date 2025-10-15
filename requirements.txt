@@ -1,13 +1,19 @@
-setuptools==69.5.1
-wheel==0.43.0
-
-Flask==2.3.3
-Werkzeug==2.3.7
-gunicorn==21.2.0
-google-auth==2.23.4
-google-auth-oauthlib==1.1.0
-google-auth-httplib2==0.1.1
-google-api-python-client==2.108.0
-sendgrid==6.10.0
-python-dotenv==1.0.0
-
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python",
+      "config": { 
+        "maxLambdaSize": "15mb",
+        "includeFiles": "templates/**,static/**"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ]
+}
