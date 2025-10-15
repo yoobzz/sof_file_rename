@@ -89,8 +89,8 @@
             letter-spacing: -0.01em;
         }
 
-        input[type="text"], 
-        input[type="file"], 
+        input[type="text"],
+        input[type="file"],
         select {
             width: 100%;
             padding: 12px 16px;
@@ -103,7 +103,7 @@
             color: var(--text-primary);
         }
 
-        input[type="text"]:focus, 
+        input[type="text"]:focus,
         select:focus {
             outline: none;
             border-color: var(--accent);
@@ -321,16 +321,16 @@
             .container {
                 margin: 0;
             }
-            
+
             .header {
                 margin-bottom: 32px;
                 padding-top: 16px;
             }
-            
+
             .header h1 {
                 font-size: 1.5rem;
             }
-            
+
             .form-container {
                 padding: 24px;
                 border-radius: 12px;
@@ -411,7 +411,7 @@
                         <option value="Projektowanie 3D">projektowanie 3d</option>
                         <option value="Projektowanie 2D">projektowanie 2d</option>
                         <option value="Prototypowanie ręczne">prototypowanie ręczne</option>
-                        <option value="Wstęp do fotografii">wstęp do fotografii</option> 
+                        <option value="Wstęp do fotografii">wstęp do fotografii</option>
                         <option value="Wstęp do krawiectwa">wstęp do krawiectwa</option>
                         <option value="Wstęp do ceramiki">wstęp do ceramiki</option>
                         <option value="Adobe 1">adobe 1</option>
@@ -475,19 +475,19 @@
             const savedFirstName = localStorage.getItem('userFirstName');
             const savedLastName = localStorage.getItem('userLastName');
             const savedExercise = localStorage.getItem('userDefaultExercise');
-            
+
             if (savedFirstName && savedLastName) {
                 document.getElementById('firstName').value = savedFirstName;
                 document.getElementById('lastName').value = savedLastName;
                 if (savedExercise) {
                     document.getElementById('projectName').value = savedExercise;
                 }
-                
-                document.getElementById('welcomeText').textContent = 
+
+                document.getElementById('welcomeText').textContent =
                     ` ${savedFirstName} ${savedLastName}`;
                 document.getElementById('userInfo').style.display = 'flex';
             }
-            
+
             // Sprawdź też dane z serwera
             fetch('/get_user_data')
                 .then(response => response.json())
@@ -500,15 +500,15 @@
                             if (data.lastExercise) {
                                 document.getElementById('projectName').value = data.lastExercise;
                             }
-                            
+
                             // Zapisz w localStorage
                             localStorage.setItem('userFirstName', data.firstName);
                             localStorage.setItem('userLastName', data.lastName);
                             if (data.lastExercise) {
                                 localStorage.setItem('userDefaultExercise', data.lastExercise);
                             }
-                            
-                            document.getElementById('welcomeText').textContent = 
+
+                            document.getElementById('welcomeText').textContent =
                                 ` ${data.firstName} ${data.lastName}`;
                             document.getElementById('userInfo').style.display = 'flex';
                         }
@@ -581,7 +581,7 @@
         function updateSubjectInput() {
             const select = document.getElementById('subjectSelect');
             const customInput = document.getElementById('customSubject');
-            
+
             if (select.value === 'custom') {
                 customInput.style.display = 'block';
                 customInput.focus();
@@ -594,7 +594,7 @@
         function updateWelcomeMessage() {
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
-            
+
             if (firstName && lastName) {
                 document.getElementById('welcomeText').textContent = ` ${firstName} ${lastName}`;
                 document.getElementById('userInfo').style.display = 'flex';
@@ -606,19 +606,19 @@
         // Obsługa formularza
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const formData = new FormData(this);
             const uploadBtn = document.getElementById('uploadBtn');
             const loading = document.getElementById('loading');
             const resultContainer = document.getElementById('resultContainer');
-            
+
             // Ukryj poprzednie wyniki
             resultContainer.style.display = 'none';
-            
+
             // Pokaż loading
             uploadBtn.disabled = true;
             loading.style.display = 'block';
-            
+
             // Symulacja progress bara
             const progressFill = document.getElementById('progressFill');
             let progress = 0;
@@ -627,7 +627,7 @@
                 if (progress > 90) progress = 90;
                 progressFill.style.width = progress + '%';
             }, 100);
-            
+
             fetch('/upload', {
                 method: 'POST',
                 body: formData
@@ -636,11 +636,11 @@
             .then(data => {
                 clearInterval(progressInterval);
                 progressFill.style.width = '100%';
-                
+
                 setTimeout(() => {
                     loading.style.display = 'none';
                     uploadBtn.disabled = false;
-                    
+
                     if (data.success) {
                         showSuccess(data);
                     } else {
@@ -661,17 +661,17 @@
             const resultTitle = document.getElementById('resultTitle');
             const resultMessage = document.getElementById('resultMessage');
             const actionButtons = document.getElementById('actionButtons');
-            
+
             resultContainer.classList.remove('error');
             resultTitle.textContent = 'gotowe!';
             resultMessage.textContent = data.message;
-            
+
             actionButtons.innerHTML = `
                 <a href="/download/${data.filePath}" class="download-btn" download>
                     pobierz plik
                 </a>
             `;
-            
+
             resultContainer.style.display = 'block';
         }
 
@@ -680,12 +680,12 @@
             const resultTitle = document.getElementById('resultTitle');
             const resultMessage = document.getElementById('resultMessage');
             const actionButtons = document.getElementById('actionButtons');
-            
+
             resultContainer.classList.add('error');
             resultTitle.textContent = 'wystąpił błąd';
             resultMessage.textContent = message;
             actionButtons.innerHTML = '';
-            
+
             resultContainer.style.display = 'block';
         }
 
@@ -695,15 +695,15 @@
                 localStorage.removeItem('userFirstName');
                 localStorage.removeItem('userLastName');
                 localStorage.removeItem('userDefaultExercise');
-                
+
                 // Wyczyść pola formularza
                 document.getElementById('firstName').value = '';
                 document.getElementById('lastName').value = '';
                 document.getElementById('projectName').value = '';
-                
+
                 // Ukryj powitanie
                 document.getElementById('userInfo').style.display = 'none';
-                
+
                 alert('dane zostały wyczyszczone');
             }
         }
