@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zmiana Nazw Plików - Student</title>
+    <title>zmień nazwę pliku</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -11,101 +14,152 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #fafaf9;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f5f5f4;
+            --text-primary: #1c1917;
+            --text-secondary: #57534e;
+            --text-tertiary: #78716c;
+            --accent: #292524;
+            --accent-light: #44403c;
+            --border: #e7e5e4;
+            --success: #059669;
+            --success-light: #d1fae5;
+            --error: #dc2626;
+            --error-light: #fee2e2;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px;
+            color: var(--text-primary);
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 600px;
+            max-width: 560px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 30px;
             text-align: center;
+            margin-bottom: 48px;
+            padding-top: 32px;
         }
 
         .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 2rem;
-            margin-bottom: 10px;
-            font-weight: 300;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
         }
 
         .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
+            color: var(--text-tertiary);
+            font-size: 0.95rem;
+            font-weight: 400;
         }
 
         .form-container {
+            background: var(--bg-secondary);
+            border-radius: 16px;
             padding: 40px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 24px;
         }
 
         label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            letter-spacing: -0.01em;
         }
 
-        input[type="text"], input[type="file"] {
+        input[type="text"], 
+        input[type="file"], 
+        select {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
         }
 
-        input[type="text"]:focus, input[type="file"]:focus {
+        input[type="text"]:focus, 
+        select:focus {
             outline: none;
-            border-color: #4facfe;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(41, 37, 36, 0.05);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .hint-text {
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            margin-top: 6px;
+            font-weight: 400;
         }
 
         .file-input-wrapper {
             position: relative;
-            display: inline-block;
+            display: block;
             width: 100%;
         }
 
         .file-input-label {
-            display: block;
-            padding: 20px;
-            border: 2px dashed #4facfe;
-            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f8f9ff;
-            color: #4facfe;
-            font-weight: 600;
+            transition: all 0.2s ease;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.9rem;
+            min-height: 120px;
         }
 
         .file-input-label:hover {
-            background: #4facfe;
-            color: white;
+            border-color: var(--accent-light);
+            background: var(--bg-secondary);
         }
 
         .file-input-label.has-file {
-            background: #e8f5e8;
-            border-color: #28a745;
-            color: #28a745;
+            background: var(--success-light);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            opacity: 0.6;
         }
 
         input[type="file"] {
@@ -115,28 +169,189 @@
 
         .upload-btn {
             width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 14px 24px;
+            background: var(--accent);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
+            transition: all 0.2s ease;
+            margin-top: 24px;
+            font-family: inherit;
+            letter-spacing: -0.01em;
         }
 
         .upload-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+            background: var(--accent-light);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
 
         .upload-btn:disabled {
-            background: #ccc;
+            background: var(--border);
+            color: var(--text-tertiary);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        .user-info {
+            background: var(--bg-tertiary);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+
+        .user-info strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .clear-btn {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
+
+        .clear-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 32px 0;
+        }
+
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .result-container {
+            display: none;
+            margin-top: 32px;
+            padding: 24px;
+            background: var(--success-light);
+            border-radius: 12px;
+            border: 1px solid var(--success);
+        }
+
+        .result-container.error {
+            background: var(--error-light);
+            border-color: var(--error);
+        }
+
+        .result-container h3 {
+            margin-bottom: 12px;
+            color: var(--success);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .result-container.error h3 {
+            color: var(--error);
+        }
+
+        .result-container p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 8px 8px 0 0;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            background: var(--success);
+            color: white;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            opacity: 0.9;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+
+            .container {
+                margin: 0;
+            }
+            
+            .header {
+                margin-bottom: 32px;
+                padding-top: 16px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .form-container {
+                padding: 24px;
+                border-radius: 12px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .file-input-label {
+                padding: 24px 16px;
+                min-height: 100px;
+            }
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2378716c' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
         }
 
         .progress-container {
@@ -146,163 +361,115 @@
 
         .progress-bar {
             width: 100%;
-            height: 6px;
-            background: #e1e5e9;
-            border-radius: 3px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: var(--accent);
             width: 0%;
             transition: width 0.3s ease;
-        }
-
-        .result-container {
-            display: none;
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #28a745;
-        }
-
-        .result-container.error {
-            background: #fff5f5;
-            border-left-color: #dc3545;
-        }
-
-        .result-container h3 {
-            margin-bottom: 15px;
-            color: #28a745;
-        }
-
-        .result-container.error h3 {
-            color: #dc3545;
-        }
-
-        .download-btn {
-            display: inline-block;
-            padding: 12px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            background: #28a745;
-            color: white;
-        }
-
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .user-info {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            color: #1976d2;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-                border-radius: 15px;
-            }
-            
-            .header {
-                padding: 20px;
-            }
-            
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .form-container {
-                padding: 20px;
-            }
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4facfe;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📝 Zmiana Nazw Plików</h1>
-            <p>Dla Studentów - Automatyczne formatowanie nazw</p>
+            <h1>pliki school of form  </h1>
+            <p>made by stas szpineta </p>
         </div>
 
         <div class="form-container">
             <div id="userInfo" class="user-info" style="display: none;">
-                <strong>👤 Witaj ponownie!</strong>
-                <span id="welcomeText"></span>
-                <button onclick="clearUserData()" style="float: right; background: none; border: none; color: #666; cursor: pointer; font-size: 0.8em;" title="Wyczyść zapisane dane">✕</button>
+                <div>
+                    <strong>czesc, </strong>
+                    <span id="welcomeText"></span>
+                </div>
+                <button onclick="clearUserData()" class="clear-btn" title="zapomnij o mnie">✕</button>
             </div>
 
             <form id="uploadForm" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="firstName">Imię *</label>
+                    <label for="firstName">imie </label>
                     <input type="text" id="firstName" name="firstName" required>
-                    <small style="color: #666; font-size: 0.8em;">💾 Zostanie zapamiętane w przeglądarce</small>
+                    <div class="hint-text">zapamiętam </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="lastName">Nazwisko *</label>
+                    <label for="lastName">nazwisko</label>
                     <input type="text" id="lastName" name="lastName" required>
-                    <small style="color: #666; font-size: 0.8em;">💾 Zostanie zapamiętane w przeglądarce</small>
+                    <div class="hint-text">to tez</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="exerciseName">Nazwa ćwiczenia (opcjonalne)</label>
-                    <input type="text" id="exerciseName" name="exerciseName" placeholder="np. Zadanie 1, Test końcowy">
-                    <small style="color: #666; font-size: 0.8em;">💾 Zostanie zapamiętane jako domyślna nazwa</small>
+                    <label for="subjectSelect">przedmiot (opcjonalne)</label>
+                    <select id="subjectSelect" name="subjectSelect" onchange="updateSubjectInput()">
+                        <option value="">-- wybierz przedmiot --</option>
+                        <option value="Projektowanie 3D">projektowanie 3d</option>
+                        <option value="Projektowanie 2D">projektowanie 2d</option>
+                        <option value="Prototypowanie ręczne">prototypowanie ręczne</option>
+                        <option value="Wstęp do fotografii">wstęp do fotografii</option> 
+                        <option value="Wstęp do krawiectwa">wstęp do krawiectwa</option>
+                        <option value="Wstęp do ceramiki">wstęp do ceramiki</option>
+                        <option value="Adobe 1">adobe 1</option>
+                        <option value="Kolor i forma">kolor i forma</option>
+                        <option value="Rhino 1">rhino 1</option>
+                        <option value="Rysunek 1">rysunek 1</option>
+                        <option value="Narzędzia cyfrowe">narzędzia cyfrowe</option>
+                        <option value="Kontekst społeczny projektu">kontekst społeczny projektu</option>
+                        <option value="Język angielski">język angielski</option>
+                        <option value="Kompetencje społeczne i akademickie">kompetencje akademickie i społeczne</option>
+                        <option value="Historia sztuki">historia sztuki</option>
+                        <option value="custom">+ dodaj własny</option>
+                    </select>
+                    <input type="text" id="customSubject" name="customSubject" placeholder="wpisz własny przedmiot" style="display: none; margin-top: 10px;">
                 </div>
 
                 <div class="form-group">
-                    <label for="file">Wybierz plik *</label>
+                    <label for="projectName">nazwa projektu/ćwiczenia/custom </label>
+                    <input type="text" id="projectName" name="projectName" placeholder="np. szablon na laser, kartkowka3d_1, list milosny do stasia sz">
+                    <div class="hint-text"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="files">wrzucaj pliki *</label>
                     <div class="file-input-wrapper">
-                        <input type="file" id="file" name="file" accept=".png,.jpg,.jpeg,.gif,.pdf,.doc,.docx" required>
-                        <label for="file" class="file-input-label" id="fileLabel">
-                            📎 Kliknij aby wybrać plik lub przeciągnij tutaj
+                        <input type="file" id="files" name="files" accept=".png,.jpg,.jpeg,.gif,.pdf,.doc,.docx" multiple>
+                        <label for="files" class="file-input-label" id="fileLabel">
+                            <div class="file-icon">📎</div>
+                            <div>kliknij lub przeciągnij pliki tutaj</div>
+                            <div class="hint-text">pliki pliki pliki od liczenia mam odciski </div>
                         </label>
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="convertToPdf" name="convertToPdf" style="margin-right: 8px;">
+                        zrób z tego PDF
+                    </label>
+                    <div class="hint-text">połączy wszystkie foty w jeden pdf</div>
+                </div>
+
+                <div class="form-group" id="compressGroup" style="display: none;">
+                    <label>
+                        <input type="checkbox" id="compressPdf" name="compressPdf" style="margin-right: 8px;">
+                        zmniejsz ten pdf
+                    </label>
+                    <div class="hint-text">dieta cud (może trochę pogorszyć jakość)</div>
+                </div>
+
                 <button type="submit" class="upload-btn" id="uploadBtn">
-                    🚀 Prześlij i Zmień Nazwę
+                    jazda 
                 </button>
             </form>
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p>Przesyłanie pliku...</p>
+                <p>working on it</p>
             </div>
 
             <div class="progress-container" id="progressContainer">
@@ -312,7 +479,7 @@
             </div>
 
             <div class="result-container" id="resultContainer">
-                <h3 id="resultTitle">✅ Sukces!</h3>
+                <h3 id="resultTitle">gotowe, powodzonka</h3>
                 <p id="resultMessage"></p>
                 <div id="actionButtons"></div>
             </div>
@@ -331,12 +498,12 @@
                 document.getElementById('firstName').value = savedFirstName;
                 document.getElementById('lastName').value = savedLastName;
                 if (savedExercise) {
-                    document.getElementById('exerciseName').value = savedExercise;
+                    document.getElementById('projectName').value = savedExercise;
                 }
                 
                 document.getElementById('welcomeText').textContent = 
-                    `${savedFirstName} ${savedLastName}`;
-                document.getElementById('userInfo').style.display = 'block';
+                    ` ${savedFirstName} ${savedLastName}`;
+                document.getElementById('userInfo').style.display = 'flex';
             }
             
             // Sprawdź też dane z serwera
@@ -349,7 +516,7 @@
                             document.getElementById('firstName').value = data.firstName;
                             document.getElementById('lastName').value = data.lastName;
                             if (data.lastExercise) {
-                                document.getElementById('exerciseName').value = data.lastExercise;
+                                document.getElementById('projectName').value = data.lastExercise;
                             }
                             
                             // Zapisz w localStorage
@@ -360,27 +527,27 @@
                             }
                             
                             document.getElementById('welcomeText').textContent = 
-                                `${data.firstName} ${data.lastName}`;
-                            document.getElementById('userInfo').style.display = 'block';
+                                ` ${data.firstName} ${data.lastName}`;
+                            document.getElementById('userInfo').style.display = 'flex';
                         }
                     }
                 });
         });
 
         // Obsługa drag & drop
-        const fileInput = document.getElementById('file');
+        const fileInput = document.getElementById('files');
         const fileLabel = document.getElementById('fileLabel');
 
         fileLabel.addEventListener('dragover', function(e) {
             e.preventDefault();
-            fileLabel.style.background = '#4facfe';
-            fileLabel.style.color = 'white';
+            fileLabel.style.borderColor = 'var(--accent)';
+            fileLabel.style.background = 'var(--bg-secondary)';
         });
 
         fileLabel.addEventListener('dragleave', function(e) {
             e.preventDefault();
-            fileLabel.style.background = '#f8f9ff';
-            fileLabel.style.color = '#4facfe';
+            fileLabel.style.borderColor = 'var(--border)';
+            fileLabel.style.background = 'var(--bg-tertiary)';
         });
 
         fileLabel.addEventListener('drop', function(e) {
@@ -388,20 +555,27 @@
             const files = e.dataTransfer.files;
             if (files.length > 0) {
                 fileInput.files = files;
-                updateFileLabel(files[0].name);
+                updateFileLabel(files);
             }
-            fileLabel.style.background = '#f8f9ff';
-            fileLabel.style.color = '#4facfe';
+            fileLabel.style.borderColor = 'var(--border)';
+            fileLabel.style.background = 'var(--bg-tertiary)';
         });
 
         fileInput.addEventListener('change', function(e) {
             if (e.target.files.length > 0) {
-                updateFileLabel(e.target.files[0].name);
+                updateFileLabel(e.target.files);
             }
         });
 
-        function updateFileLabel(filename) {
-            fileLabel.textContent = `📎 ${filename}`;
+        function updateFileLabel(files) {
+            const fileCount = files.length;
+            const fileNames = Array.from(files).map(f => f.name).join(', ');
+            
+            fileLabel.innerHTML = `
+                <div class="file-icon">✓</div>
+                <div>${fileCount} plik${fileCount > 1 ? 'ów' : ''} wybran${fileCount > 1 ? 'ych' : ''}</div>
+                <div style="font-size: 0.8rem; margin-top: 4px; opacity: 0.7;">${fileNames.length > 50 ? fileNames.substring(0, 50) + '...' : fileNames}</div>
+            `;
             fileLabel.classList.add('has-file');
         }
 
@@ -420,9 +594,33 @@
             }
         });
 
-        document.getElementById('exerciseName').addEventListener('input', function() {
+        document.getElementById('projectName').addEventListener('input', function() {
             if (this.value.trim()) {
-                localStorage.setItem('userDefaultExercise', this.value.trim());
+                localStorage.setItem('userDefaultProject', this.value.trim());
+            }
+        });
+
+        function updateSubjectInput() {
+            const select = document.getElementById('subjectSelect');
+            const customInput = document.getElementById('customSubject');
+            
+            if (select.value === 'custom') {
+                customInput.style.display = 'block';
+                customInput.focus();
+            } else {
+                customInput.style.display = 'none';
+                customInput.value = '';
+            }
+        }
+
+        // Obsługa checkboxa PDF
+        document.getElementById('convertToPdf').addEventListener('change', function() {
+            const compressGroup = document.getElementById('compressGroup');
+            if (this.checked) {
+                compressGroup.style.display = 'block';
+            } else {
+                compressGroup.style.display = 'none';
+                document.getElementById('compressPdf').checked = false;
             }
         });
 
@@ -431,8 +629,8 @@
             const lastName = document.getElementById('lastName').value.trim();
             
             if (firstName && lastName) {
-                document.getElementById('welcomeText').textContent = `${firstName} ${lastName}`;
-                document.getElementById('userInfo').style.display = 'block';
+                document.getElementById('welcomeText').textContent = ` ${firstName} ${lastName}`;
+                document.getElementById('userInfo').style.display = 'flex';
             } else {
                 document.getElementById('userInfo').style.display = 'none';
             }
@@ -463,6 +661,12 @@
                 progressFill.style.width = progress + '%';
             }, 100);
             
+            // Dodaj checkboxy do formData
+            const convertToPdf = document.getElementById('convertToPdf').checked;
+            const compressPdf = document.getElementById('compressPdf').checked;
+            formData.append('convertToPdf', convertToPdf);
+            formData.append('compressPdf', compressPdf);
+            
             fetch('/upload', {
                 method: 'POST',
                 body: formData
@@ -487,7 +691,7 @@
                 clearInterval(progressInterval);
                 loading.style.display = 'none';
                 uploadBtn.disabled = false;
-                showError('Wystąpił błąd podczas przesyłania pliku');
+                showError('wystąpił błąd podczas przesyłania pliku');
             });
         });
 
@@ -498,14 +702,29 @@
             const actionButtons = document.getElementById('actionButtons');
             
             resultContainer.classList.remove('error');
-            resultTitle.textContent = '✅ Sukces!';
-            resultMessage.textContent = data.message;
+            resultTitle.textContent = 'zrobione!';
+            resultMessage.textContent = data.message + ' (nie dziękuj, to moja robota)';
             
-            actionButtons.innerHTML = `
-                <a href="/download/${data.filePath}" class="download-btn" download>
-                     Pobierz plik
-                </a>
-            `;
+            // Obsługa wielu plików
+            if (data.files && data.files.length > 0) {
+                let buttonsHtml = '';
+                data.files.forEach(file => {
+                    const fileType = file.type === 'pdf' ? 'PDF' : 'oryginalny';
+                    buttonsHtml += `
+                        <a href="/download/${file.filePath}" class="download-btn" download>
+                            weź to ${fileType} (${file.filename})
+                        </a>
+                    `;
+                });
+                actionButtons.innerHTML = buttonsHtml;
+            } else if (data.filePath) {
+                // Fallback dla pojedynczego pliku
+                actionButtons.innerHTML = `
+                    <a href="/download/${data.filePath}" class="download-btn" download>
+                        weź to
+                    </a>
+                `;
+            }
             
             resultContainer.style.display = 'block';
         }
@@ -517,16 +736,15 @@
             const actionButtons = document.getElementById('actionButtons');
             
             resultContainer.classList.add('error');
-            resultTitle.textContent = '❌ Błąd!';
-            resultMessage.textContent = message;
+            resultTitle.textContent = 'ups, coś poszło nie tak';
+            resultMessage.textContent = message + ' (spróbuj jeszcze raz, może tym razem się uda)';
             actionButtons.innerHTML = '';
             
             resultContainer.style.display = 'block';
         }
 
-
         function clearUserData() {
-            if (confirm('Czy na pewno chcesz wyczyścić zapisane dane?')) {
+            if (confirm('na pewno chcesz żebym o tobie zapomniał?')) {
                 // Wyczyść localStorage
                 localStorage.removeItem('userFirstName');
                 localStorage.removeItem('userLastName');
@@ -535,14 +753,15 @@
                 // Wyczyść pola formularza
                 document.getElementById('firstName').value = '';
                 document.getElementById('lastName').value = '';
-                document.getElementById('exerciseName').value = '';
+                document.getElementById('projectName').value = '';
                 
                 // Ukryj powitanie
                 document.getElementById('userInfo').style.display = 'none';
                 
-                alert('✅ Zapisane dane zostały wyczyszczone');
+                alert('ok, zapomniałem o tobie (ale wróć jak będziesz potrzebować pomocy)');
             }
         }
     </script>
 </body>
-</html
+</html>
+</html>

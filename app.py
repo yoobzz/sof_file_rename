@@ -6,6 +6,12 @@ import uuid
 from datetime import datetime
 import re
 from pathlib import Path
+from PIL import Image
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4, letter
+from reportlab.lib.utils import ImageReader
+import io
+import PyPDF2
 
 app = Flask(__name__)
 
@@ -52,16 +58,88 @@ def generate_filename(original_name, first_name, last_name, exercise_name=None):
     
     return f"{base_name}{file_ext}"
 
+def convert_images_to_pdf(image_paths, output_path, page_size=A4):
+    """Konwertuje obrazy do PDF"""
+    c = canvas.Canvas(output_path, pagesize=page_size)
+    width, height = page_size
+    
+    for i, image_path in enumerate(image_paths):
+        if i > 0:  # Nowa strona dla każdego obrazu oprócz pierwszego
+            c.showPage()
+        
+        try:
+            # Otwórz obraz
+            img = Image.open(image_path)
+            
+            # Oblicz rozmiary zachowując proporcje
+            img_width, img_height = img.size
+            aspect_ratio = img_width / img_height
+            
+            # Dostosuj rozmiar do strony
+            if aspect_ratio > width / height:
+                # Obraz szerszy niż strona
+                new_width = width - 40  # margines 20px z każdej strony
+                new_height = new_width / aspect_ratio
+            else:
+                # Obraz wyższy niż strona
+                new_height = height - 40
+                new_width = new_height * aspect_ratio
+            
+            # Wyśrodkuj obraz
+            x = (width - new_width) / 2
+            y = (height - new_height) / 2
+            
+            # Dodaj obraz do PDF
+            c.drawImage(image_path, x, y, width=new_width, height=new_height)
+            
+        except Exception as e:
+            print(f"Błąd podczas przetwarzania obrazu {image_path}: {e}")
+            continue
+    
+    c.save()
+
+def convert_single_image_to_pdf(image_path, output_path, page_size=A4):
+    """Konwertuje pojedynczy obraz do PDF"""
+    convert_images_to_pdf([image_path], output_path, page_size)
+
+def compress_pdf(input_path, output_path):
+    """Kompresuje PDF używając PyPDF2"""
+    try:
+        with open(input_path, 'rb') as input_file:
+            pdf_reader = PyPDF2.PdfReader(input_file)
+            pdf_writer = PyPDF2.PdfWriter()
+            
+            # Kopiuj wszystkie strony z kompresją
+            for page in pdf_reader.pages:
+                page.compress_content_streams()
+                pdf_writer.add_page(page)
+            
+            # Zapisz skompresowany PDF
+            with open(output_path, 'wb') as output_file:
+                pdf_writer.write(output_file)
+        
+        return True
+    except Exception as e:
+        print(f"Błąd podczas kompresji PDF: {e}")
+        return False
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'Brak pliku'}), 400
+    # Sprawdź czy są pliki
+    if 'files' not in request.files and 'file' not in request.files:
+        return jsonify({'error': 'Brak plików'}), 400
     
-    file = request.files['file']
+    # Pobierz pliki (może być jeden lub wiele)
+    files = request.files.getlist('files')
+    if not files or files[0].filename == '':
+        # Fallback na pojedynczy plik
+        files = [request.files['file']]
+        if files[0].filename == '':
+            return jsonify({'error': 'Nie wybrano plików'}), 400
     
     # Pobierz dane z formularza lub z sesji
     user_id = session.get('user_id')
@@ -70,16 +148,33 @@ def upload_file():
     
     first_name = request.form.get('firstName', '').strip() or user_data.get('firstName', '')
     last_name = request.form.get('lastName', '').strip() or user_data.get('lastName', '')
-    exercise_name = request.form.get('exerciseName', '').strip() or user_data.get('defaultExercise', '')
     
-    if file.filename == '':
-        return jsonify({'error': 'Nie wybrano pliku'}), 400
+    # Pobierz przedmiot i projekt
+    subject = request.form.get('subjectSelect', '').strip()
+    custom_subject = request.form.get('customSubject', '').strip()
+    project_name = request.form.get('projectName', '').strip()
+    
+    # Pobierz opcje konwersji
+    convert_to_pdf = request.form.get('convertToPdf') == 'on'
+    should_compress_pdf = request.form.get('compressPdf') == 'on'
+    
+    # Stwórz pełną nazwę ćwiczenia
+    exercise_name = ''
+    if subject and subject != 'custom':
+        exercise_name = subject
+    elif custom_subject:
+        exercise_name = custom_subject
+    
+    if project_name:
+        exercise_name += f'_{project_name}' if exercise_name else project_name
     
     if not first_name or not last_name:
         return jsonify({'error': 'Imię i nazwisko są wymagane. Skonfiguruj je w ustawieniach.'}), 400
     
-    if not allowed_file(file.filename):
-        return jsonify({'error': 'Nieprawidłowy typ pliku'}), 400
+    # Sprawdź czy wszystkie pliki są dozwolone
+    for file in files:
+        if not allowed_file(file.filename):
+            return jsonify({'error': f'Nieprawidłowy typ pliku: {file.filename}'}), 400
     
     # Zapisz dane użytkownika w sesji
     session['firstName'] = first_name
@@ -99,19 +194,73 @@ def upload_file():
     }
     save_users(users_data)
     
-    # Wygeneruj nową nazwę pliku
-    new_filename = generate_filename(file.filename, first_name, last_name, exercise_name)
+    saved_files = []
     
-    # Zapisz plik
-    filename = secure_filename(new_filename)
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(file_path)
+    if convert_to_pdf:
+        # Konwersja do PDF
+        image_paths = []
+        
+        # Zapisz wszystkie obrazy tymczasowo
+        for file in files:
+            if file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+                temp_filename = secure_filename(file.filename)
+                temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{temp_filename}")
+                file.save(temp_path)
+                image_paths.append(temp_path)
+        
+        if image_paths:
+            # Wygeneruj nazwę PDF
+            pdf_filename = generate_filename("combined.pdf", first_name, last_name, exercise_name)
+            pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_filename)
+            compressed_pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], f"compressed_{pdf_filename}")
+            
+            # Konwertuj obrazy do PDF
+            convert_images_to_pdf(image_paths, pdf_path)
+            
+            # Kompresuj PDF tylko jeśli zaznaczono
+            if should_compress_pdf:
+                if compress_pdf(pdf_path, compressed_pdf_path):
+                    # Usuń niekompresowany PDF i zmień nazwę skompresowanego
+                    os.remove(pdf_path)
+                    os.rename(compressed_pdf_path, pdf_path)
+                    print(f"PDF skompresowany: {pdf_filename}")
+                else:
+                    print(f"Nie udało się skompresować PDF: {pdf_filename}")
+            else:
+                print(f"PDF utworzony bez kompresji: {pdf_filename}")
+            
+            # Usuń tymczasowe pliki
+            for temp_path in image_paths:
+                try:
+                    os.remove(temp_path)
+                except:
+                    pass
+            
+            saved_files.append({
+                'filename': pdf_filename,
+                'filePath': pdf_filename,
+                'type': 'pdf'
+            })
+        else:
+            return jsonify({'error': 'Brak obrazów do konwersji'}), 400
+    else:
+        # Normalne zapisywanie plików
+        for file in files:
+            new_filename = generate_filename(file.filename, first_name, last_name, exercise_name)
+            filename = secure_filename(new_filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            saved_files.append({
+                'filename': new_filename,
+                'filePath': filename,
+                'type': 'original'
+            })
     
     return jsonify({
         'success': True,
-        'newFilename': new_filename,
-        'filePath': filename,
-        'message': 'Plik został przesłany pomyślnie!'
+        'files': saved_files,
+        'message': f'{"Pliki zostały" if len(saved_files) > 1 else "Plik został"} przesłane pomyślnie!'
     })
 
 @app.route('/download/<filename>')
