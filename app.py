@@ -26,7 +26,10 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
 app.config['SECRET_KEY'] = SECRET_KEY
 
 # Stwórz folder uploads jeśli nie istnieje
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+try:
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+except Exception as e:
+    print(f"Nie można utworzyć folderu uploads: {e}")
 
 def load_users():
     if os.path.exists(USERS_FILE):
@@ -288,6 +291,10 @@ def send_email():
     return jsonify({'error': 'Funkcja email będzie dostępna wkrótce!'}), 501
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    debug = os.environ.get('FLASK_ENV') == 'development'
-    app.run(debug=debug, host='0.0.0.0', port=port)
+    try:
+        port = int(os.environ.get('PORT', 5000))
+        debug = os.environ.get('FLASK_ENV') == 'development'
+        app.run(debug=debug, host='0.0.0.0', port=port)
+    except Exception as e:
+        print(f"Błąd uruchamiania aplikacji: {e}")
+        raise
