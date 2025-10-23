@@ -37,14 +37,14 @@ except Exception as e:
     print(f"Nie można utworzyć folderu uploads: {e}")
 
 def load_users():
-    if os.path.exists(USERS_FILE):
-        with open(USERS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+    # Na Vercel nie możemy zapisywać plików lokalnie
+    # Używamy tylko sesji
     return {}
 
 def save_users(users_data):
-    with open(USERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(users_data, f, ensure_ascii=False, indent=2)
+    # Na Vercel nie możemy zapisywać plików lokalnie
+    # Dane są przechowywane tylko w sesji
+    pass
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -194,18 +194,9 @@ def upload_file():
         session['lastName'] = last_name
         session['exerciseName'] = exercise_name
         
-        # Zapisz dane użytkownika w pliku
-        users_data = load_users()
+        # Zapisz dane użytkownika w sesji (na Vercel nie możemy zapisywać plików lokalnie)
         user_id = session.get('user_id', str(uuid.uuid4()))
         session['user_id'] = user_id
-        
-        users_data[user_id] = {
-            'firstName': first_name,
-            'lastName': last_name,
-            'lastExercise': exercise_name,
-            'lastLogin': datetime.now().isoformat()
-        }
-        save_users(users_data)
         
         saved_files = []
         
@@ -217,75 +208,25 @@ def upload_file():
             # Konwersja do PDF
             image_paths = []
             
-            # Zapisz wszystkie obrazy tymczasowo
-            for file in files:
-                if file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
-                    try:
-                        temp_filename = secure_filename(file.filename)
-                        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{temp_filename}")
-                        file.save(temp_path)
-                        image_paths.append(temp_path)
-                    except Exception as e:
-                        print(f"Błąd podczas zapisywania obrazu {file.filename}: {e}")
-                        continue
-            
-            if image_paths:
-                # Wygeneruj nazwę PDF
-                pdf_filename = generate_filename("combined.pdf", first_name, last_name, exercise_name)
-                pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_filename)
-                compressed_pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], f"compressed_{pdf_filename}")
-                
-                # Konwertuj obrazy do PDF
-                convert_images_to_pdf(image_paths, pdf_path)
-                
-                # Kompresuj PDF tylko jeśli zaznaczono
-                if should_compress_pdf:
-                    if compress_pdf(pdf_path, compressed_pdf_path):
-                        # Usuń niekompresowany PDF i zmień nazwę skompresowanego
-                        os.remove(pdf_path)
-                        os.rename(compressed_pdf_path, pdf_path)
-                        print(f"PDF skompresowany: {pdf_filename}")
-                    else:
-                        print(f"Nie udało się skompresować PDF: {pdf_filename}")
-                else:
-                    print(f"PDF utworzony bez kompresji: {pdf_filename}")
-                
-                # Usuń tymczasowe pliki
-                for temp_path in image_paths:
-                    try:
-                        os.remove(temp_path)
-                    except:
-                        pass
-                
-                saved_files.append({
-                    'filename': pdf_filename,
-                    'filePath': pdf_filename,
-                    'type': 'pdf'
-                })
-            else:
-                return jsonify({'error': 'Brak obrazów do konwersji. Upewnij się, że przesłałeś pliki PNG, JPG, JPEG lub GIF.'}), 400
+            # Na Vercel nie możemy zapisywać plików lokalnie
+            # Konwersja do PDF nie jest dostępna
+            return jsonify({'error': 'Konwersja do PDF nie jest dostępna na Vercel. Użyj lokalnej wersji aplikacji.'}), 400
         else:
-            # Normalne zapisywanie plików
+            # Na Vercel nie możemy zapisywać plików lokalnie
+            # Zwracamy tylko nowe nazwy plików
             for file in files:
-                try:
-                    new_filename = generate_filename(file.filename, first_name, last_name, exercise_name)
-                    filename = secure_filename(new_filename)
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)
-                except Exception as e:
-                    print(f"Błąd podczas zapisywania pliku {file.filename}: {e}")
-                    return jsonify({'error': f'Błąd podczas zapisywania pliku {file.filename}: {str(e)}'}), 500
+                new_filename = generate_filename(file.filename, first_name, last_name, exercise_name)
                 
                 saved_files.append({
                     'filename': new_filename,
-                    'filePath': filename,
+                    'filePath': new_filename,
                     'type': 'original'
                 })
         
         return jsonify({
             'success': True,
             'files': saved_files,
-            'message': f'{"Pliki zostały" if len(saved_files) > 1 else "Plik został"} przesłane pomyślnie!'
+            'message': f'{"Pliki zostały" if len(saved_files) > 1 else "Plik został"} przesłane pomyślnie! (tylko nowe nazwy)'
         })
     except Exception as e:
         print(f"Błąd podczas przesyłania pliku: {e}")
@@ -293,10 +234,8 @@ def upload_file():
 
 @app.route('/download/<filename>')
 def download_file(filename):
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    if os.path.exists(file_path):
-        return send_file(file_path, as_attachment=True)
-    return jsonify({'error': 'Plik nie został znaleziony'}), 404
+    # Na Vercel nie możemy zapisywać plików lokalnie
+    return jsonify({'error': 'Pobieranie plików nie jest dostępne na Vercel. Użyj lokalnej wersji aplikacji.'}), 404
 
 @app.route('/get_user_data')
 def get_user_data():
