@@ -132,139 +132,143 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    # Sprawdź czy są pliki
-    if 'files' not in request.files and 'file' not in request.files:
-        return jsonify({'error': 'Brak plików'}), 400
-    
-    # Pobierz pliki (może być jeden lub wiele)
-    files = request.files.getlist('files')
-    if not files or files[0].filename == '':
-        # Fallback na pojedynczy plik
-        files = [request.files['file']]
-        if files[0].filename == '':
-            return jsonify({'error': 'Nie wybrano plików'}), 400
-    
-    # Pobierz dane z formularza lub z sesji
-    user_id = session.get('user_id')
-    users_data = load_users()
-    user_data = users_data.get(user_id, {}) if user_id else {}
-    
-    first_name = request.form.get('firstName', '').strip() or user_data.get('firstName', '')
-    last_name = request.form.get('lastName', '').strip() or user_data.get('lastName', '')
-    
-    # Pobierz przedmiot i projekt
-    subject = request.form.get('subjectSelect', '').strip()
-    custom_subject = request.form.get('customSubject', '').strip()
-    project_name = request.form.get('projectName', '').strip()
-    
-    # Pobierz opcje konwersji
-    convert_to_pdf = request.form.get('convertToPdf') == 'on'
-    should_compress_pdf = request.form.get('compressPdf') == 'on'
-    
-    # Stwórz pełną nazwę ćwiczenia
-    exercise_name = ''
-    if subject and subject != 'custom':
-        exercise_name = subject
-    elif custom_subject:
-        exercise_name = custom_subject
-    
-    if project_name:
-        exercise_name += f'_{project_name}' if exercise_name else project_name
-    
-    if not first_name or not last_name:
-        return jsonify({'error': 'Imię i nazwisko są wymagane. Skonfiguruj je w ustawieniach.'}), 400
-    
-    # Sprawdź czy wszystkie pliki są dozwolone
-    for file in files:
-        if not allowed_file(file.filename):
-            return jsonify({'error': f'Nieprawidłowy typ pliku: {file.filename}'}), 400
-    
-    # Zapisz dane użytkownika w sesji
-    session['firstName'] = first_name
-    session['lastName'] = last_name
-    session['exerciseName'] = exercise_name
-    
-    # Zapisz dane użytkownika w pliku
-    users_data = load_users()
-    user_id = session.get('user_id', str(uuid.uuid4()))
-    session['user_id'] = user_id
-    
-    users_data[user_id] = {
-        'firstName': first_name,
-        'lastName': last_name,
-        'lastExercise': exercise_name,
-        'lastLogin': datetime.now().isoformat()
-    }
-    save_users(users_data)
-    
-    saved_files = []
-    
-    if convert_to_pdf:
-        # Konwersja do PDF
-        image_paths = []
+    try:
+        # Sprawdź czy są pliki
+        if 'files' not in request.files and 'file' not in request.files:
+            return jsonify({'error': 'Brak plików'}), 400
         
-        # Zapisz wszystkie obrazy tymczasowo
+        # Pobierz pliki (może być jeden lub wiele)
+        files = request.files.getlist('files')
+        if not files or files[0].filename == '':
+            # Fallback na pojedynczy plik
+            files = [request.files['file']]
+            if files[0].filename == '':
+                return jsonify({'error': 'Nie wybrano plików'}), 400
+        
+        # Pobierz dane z formularza lub z sesji
+        user_id = session.get('user_id')
+        users_data = load_users()
+        user_data = users_data.get(user_id, {}) if user_id else {}
+        
+        first_name = request.form.get('firstName', '').strip() or user_data.get('firstName', '')
+        last_name = request.form.get('lastName', '').strip() or user_data.get('lastName', '')
+        
+        # Pobierz przedmiot i projekt
+        subject = request.form.get('subjectSelect', '').strip()
+        custom_subject = request.form.get('customSubject', '').strip()
+        project_name = request.form.get('projectName', '').strip()
+        
+        # Pobierz opcje konwersji
+        convert_to_pdf = request.form.get('convertToPdf') == 'on'
+        should_compress_pdf = request.form.get('compressPdf') == 'on'
+        
+        # Stwórz pełną nazwę ćwiczenia
+        exercise_name = ''
+        if subject and subject != 'custom':
+            exercise_name = subject
+        elif custom_subject:
+            exercise_name = custom_subject
+        
+        if project_name:
+            exercise_name += f'_{project_name}' if exercise_name else project_name
+        
+        if not first_name or not last_name:
+            return jsonify({'error': 'Imię i nazwisko są wymagane. Skonfiguruj je w ustawieniach.'}), 400
+        
+        # Sprawdź czy wszystkie pliki są dozwolone
         for file in files:
-            if file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
-                temp_filename = secure_filename(file.filename)
-                temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{temp_filename}")
-                file.save(temp_path)
-                image_paths.append(temp_path)
+            if not allowed_file(file.filename):
+                return jsonify({'error': f'Nieprawidłowy typ pliku: {file.filename}'}), 400
         
-        if image_paths:
-            # Wygeneruj nazwę PDF
-            pdf_filename = generate_filename("combined.pdf", first_name, last_name, exercise_name)
-            pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_filename)
-            compressed_pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], f"compressed_{pdf_filename}")
+        # Zapisz dane użytkownika w sesji
+        session['firstName'] = first_name
+        session['lastName'] = last_name
+        session['exerciseName'] = exercise_name
+        
+        # Zapisz dane użytkownika w pliku
+        users_data = load_users()
+        user_id = session.get('user_id', str(uuid.uuid4()))
+        session['user_id'] = user_id
+        
+        users_data[user_id] = {
+            'firstName': first_name,
+            'lastName': last_name,
+            'lastExercise': exercise_name,
+            'lastLogin': datetime.now().isoformat()
+        }
+        save_users(users_data)
+        
+        saved_files = []
+        
+        if convert_to_pdf:
+            # Konwersja do PDF
+            image_paths = []
             
-            # Konwertuj obrazy do PDF
-            convert_images_to_pdf(image_paths, pdf_path)
+            # Zapisz wszystkie obrazy tymczasowo
+            for file in files:
+                if file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+                    temp_filename = secure_filename(file.filename)
+                    temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{temp_filename}")
+                    file.save(temp_path)
+                    image_paths.append(temp_path)
             
-            # Kompresuj PDF tylko jeśli zaznaczono
-            if should_compress_pdf:
-                if compress_pdf(pdf_path, compressed_pdf_path):
-                    # Usuń niekompresowany PDF i zmień nazwę skompresowanego
-                    os.remove(pdf_path)
-                    os.rename(compressed_pdf_path, pdf_path)
-                    print(f"PDF skompresowany: {pdf_filename}")
+            if image_paths:
+                # Wygeneruj nazwę PDF
+                pdf_filename = generate_filename("combined.pdf", first_name, last_name, exercise_name)
+                pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_filename)
+                compressed_pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], f"compressed_{pdf_filename}")
+                
+                # Konwertuj obrazy do PDF
+                convert_images_to_pdf(image_paths, pdf_path)
+                
+                # Kompresuj PDF tylko jeśli zaznaczono
+                if should_compress_pdf:
+                    if compress_pdf(pdf_path, compressed_pdf_path):
+                        # Usuń niekompresowany PDF i zmień nazwę skompresowanego
+                        os.remove(pdf_path)
+                        os.rename(compressed_pdf_path, pdf_path)
+                        print(f"PDF skompresowany: {pdf_filename}")
+                    else:
+                        print(f"Nie udało się skompresować PDF: {pdf_filename}")
                 else:
-                    print(f"Nie udało się skompresować PDF: {pdf_filename}")
+                    print(f"PDF utworzony bez kompresji: {pdf_filename}")
+                
+                # Usuń tymczasowe pliki
+                for temp_path in image_paths:
+                    try:
+                        os.remove(temp_path)
+                    except:
+                        pass
+                
+                saved_files.append({
+                    'filename': pdf_filename,
+                    'filePath': pdf_filename,
+                    'type': 'pdf'
+                })
             else:
-                print(f"PDF utworzony bez kompresji: {pdf_filename}")
-            
-            # Usuń tymczasowe pliki
-            for temp_path in image_paths:
-                try:
-                    os.remove(temp_path)
-                except:
-                    pass
-            
-            saved_files.append({
-                'filename': pdf_filename,
-                'filePath': pdf_filename,
-                'type': 'pdf'
-            })
+                return jsonify({'error': 'Brak obrazów do konwersji'}), 400
         else:
-            return jsonify({'error': 'Brak obrazów do konwersji'}), 400
-    else:
-        # Normalne zapisywanie plików
-        for file in files:
-            new_filename = generate_filename(file.filename, first_name, last_name, exercise_name)
-            filename = secure_filename(new_filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            
-            saved_files.append({
-                'filename': new_filename,
-                'filePath': filename,
-                'type': 'original'
-            })
-    
-    return jsonify({
-        'success': True,
-        'files': saved_files,
-        'message': f'{"Pliki zostały" if len(saved_files) > 1 else "Plik został"} przesłane pomyślnie!'
-    })
+            # Normalne zapisywanie plików
+            for file in files:
+                new_filename = generate_filename(file.filename, first_name, last_name, exercise_name)
+                filename = secure_filename(new_filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                
+                saved_files.append({
+                    'filename': new_filename,
+                    'filePath': filename,
+                    'type': 'original'
+                })
+        
+        return jsonify({
+            'success': True,
+            'files': saved_files,
+            'message': f'{"Pliki zostały" if len(saved_files) > 1 else "Plik został"} przesłane pomyślnie!'
+        })
+    except Exception as e:
+        print(f"Błąd podczas przesyłania pliku: {e}")
+        return jsonify({'error': f'wystąpił błąd podczas przesyłania pliku (spróbuj jeszcze raz, może tym razem się uda): {str(e)}'}), 500
 
 @app.route('/download/<filename>')
 def download_file(filename):
