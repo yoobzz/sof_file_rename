@@ -6,7 +6,12 @@ import uuid
 from datetime import datetime
 import re
 from pathlib import Path
-from PIL import Image
+try:
+    from PIL import Image
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+    print("PIL/Pillow nie jest dostępne - konwersja do PDF będzie wyłączona")
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, letter
 from reportlab.lib.utils import ImageReader
@@ -63,43 +68,47 @@ def generate_filename(original_name, first_name, last_name, exercise_name=None):
 
 def convert_images_to_pdf(image_paths, output_path, page_size=A4):
     """Konwertuje obrazy do PDF"""
-    c = canvas.Canvas(output_path, pagesize=page_size)
-    width, height = page_size
-    
-    for i, image_path in enumerate(image_paths):
-        if i > 0:  # Nowa strona dla każdego obrazu oprócz pierwszego
-            c.showPage()
+    try:
+        c = canvas.Canvas(output_path, pagesize=page_size)
+        width, height = page_size
         
-        try:
-            # Otwórz obraz
-            img = Image.open(image_path)
+        for i, image_path in enumerate(image_paths):
+            if i > 0:  # Nowa strona dla każdego obrazu oprócz pierwszego
+                c.showPage()
             
-            # Oblicz rozmiary zachowując proporcje
-            img_width, img_height = img.size
-            aspect_ratio = img_width / img_height
-            
-            # Dostosuj rozmiar do strony
-            if aspect_ratio > width / height:
-                # Obraz szerszy niż strona
-                new_width = width - 40  # margines 20px z każdej strony
-                new_height = new_width / aspect_ratio
-            else:
-                # Obraz wyższy niż strona
-                new_height = height - 40
-                new_width = new_height * aspect_ratio
-            
-            # Wyśrodkuj obraz
-            x = (width - new_width) / 2
-            y = (height - new_height) / 2
-            
-            # Dodaj obraz do PDF
-            c.drawImage(image_path, x, y, width=new_width, height=new_height)
-            
-        except Exception as e:
-            print(f"Błąd podczas przetwarzania obrazu {image_path}: {e}")
-            continue
-    
-    c.save()
+            try:
+                # Otwórz obraz
+                img = Image.open(image_path)
+                
+                # Oblicz rozmiary zachowując proporcje
+                img_width, img_height = img.size
+                aspect_ratio = img_width / img_height
+                
+                # Dostosuj rozmiar do strony
+                if aspect_ratio > width / height:
+                    # Obraz szerszy niż strona
+                    new_width = width - 40  # margines 20px z każdej strony
+                    new_height = new_width / aspect_ratio
+                else:
+                    # Obraz wyższy niż strona
+                    new_height = height - 40
+                    new_width = new_height * aspect_ratio
+                
+                # Wyśrodkuj obraz
+                x = (width - new_width) / 2
+                y = (height - new_height) / 2
+                
+                # Dodaj obraz do PDF
+                c.drawImage(image_path, x, y, width=new_width, height=new_height)
+                
+            except Exception as e:
+                print(f"Błąd podczas przetwarzania obrazu {image_path}: {e}")
+                continue
+        
+        c.save()
+    except Exception as e:
+        print(f"Błąd podczas tworzenia PDF: {e}")
+        raise
 
 def convert_single_image_to_pdf(image_path, output_path, page_size=A4):
     """Konwertuje pojedynczy obraz do PDF"""
@@ -201,16 +210,24 @@ def upload_file():
         saved_files = []
         
         if convert_to_pdf:
+            # Sprawdź czy PIL jest dostępne
+            if not PIL_AVAILABLE:
+                return jsonify({'error': 'Konwersja do PDF nie jest dostępna na tym serwerze. Spróbuj bez konwersji.'}), 400
+            
             # Konwersja do PDF
             image_paths = []
             
             # Zapisz wszystkie obrazy tymczasowo
             for file in files:
                 if file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
-                    temp_filename = secure_filename(file.filename)
-                    temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{temp_filename}")
-                    file.save(temp_path)
-                    image_paths.append(temp_path)
+                    try:
+                        temp_filename = secure_filename(file.filename)
+                        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{temp_filename}")
+                        file.save(temp_path)
+                        image_paths.append(temp_path)
+                    except Exception as e:
+                        print(f"Błąd podczas zapisywania obrazu {file.filename}: {e}")
+                        continue
             
             if image_paths:
                 # Wygeneruj nazwę PDF
@@ -246,14 +263,18 @@ def upload_file():
                     'type': 'pdf'
                 })
             else:
-                return jsonify({'error': 'Brak obrazów do konwersji'}), 400
+                return jsonify({'error': 'Brak obrazów do konwersji. Upewnij się, że przesłałeś pliki PNG, JPG, JPEG lub GIF.'}), 400
         else:
             # Normalne zapisywanie plików
             for file in files:
-                new_filename = generate_filename(file.filename, first_name, last_name, exercise_name)
-                filename = secure_filename(new_filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
+                try:
+                    new_filename = generate_filename(file.filename, first_name, last_name, exercise_name)
+                    filename = secure_filename(new_filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                except Exception as e:
+                    print(f"Błąd podczas zapisywania pliku {file.filename}: {e}")
+                    return jsonify({'error': f'Błąd podczas zapisywania pliku {file.filename}: {str(e)}'}), 500
                 
                 saved_files.append({
                     'filename': new_filename,
