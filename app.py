@@ -26,6 +26,13 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx'}
 USERS_FILE = 'users_data.json'
 SECRET_KEY = 'dev-secret-key-change-in-production'
 
+# Konfiguracja dla PythonAnywhere
+import os
+if 'PYTHONANYWHERE_DOMAIN' in os.environ:
+    # Jesteśmy na PythonAnywhere
+    UPLOAD_FOLDER = '/home/username/sof_file_rename/uploads'  # Zmień username na swój
+    USERS_FILE = '/home/username/sof_file_rename/users_data.json'
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
 app.config['SECRET_KEY'] = SECRET_KEY
